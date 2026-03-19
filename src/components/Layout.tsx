@@ -1,16 +1,12 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
+import Navbar from './Navbar'
 import '../App.css'
 
 export default function Layout() {
     return (
-        <div>
-            <nav className="m-3">
-                <Link to="/" className="me-3">Home</Link>
-                <Link to="/test" className="me-3">Test</Link>
-                {/* <Link to="/about/">About</Link> */}
-            </nav>
-
-            <main>
+        <div className="app-shell">
+            <Navbar />
+            <main className="app-main">
                 <Outlet />
             </main>
         </div>
