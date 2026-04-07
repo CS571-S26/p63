@@ -6,8 +6,10 @@ import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Route, Routes } from 'react-router'
 import Layout from './components/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
+import ProfilePage from './pages/ProfilePage'
 import SignUpPage from './pages/SignUpPage'
 import TestPage from './pages/TestPage'
 
@@ -20,6 +22,7 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/test" element={<TestPage />} />
       </Route>
     </Routes>

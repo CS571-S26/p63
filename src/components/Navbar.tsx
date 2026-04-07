@@ -1,10 +1,23 @@
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
+import { onAuthStateChanged } from 'firebase/auth'
+import { auth } from '../firebase'
+import UserMenu from './UserMenu'
 import rmrLogo from '../assets/RMRlogo.png'
 import './Navbar.css'
 
 export default function Navbar() {
 	const navigate = useNavigate()
+	const [isSignedIn, setIsSignedIn] = useState(false)
+
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, (user) => {
+			setIsSignedIn(Boolean(user))
+		})
+
+		return () => unsubscribe()
+	}, [])
 
 	return (
 		<header className="navbar navbar-dark bg-black fixed-top border-bottom border-secondary" aria-label="Top navigation">
@@ -14,8 +27,14 @@ export default function Navbar() {
 				</Link>
 
 				<div className="d-flex align-items-center gap-2">
-					<Button type="button" variant="" className="rmp-auth-btn rmp-login-btn" onClick={() => navigate('/login')}>Log In</Button>
-					<Button type="button" variant="outline-light" className="rmp-auth-btn" onClick={() => navigate('/signup')}>Sign Up</Button>
+					{isSignedIn ? (
+						<UserMenu />
+					) : (
+						<>
+							<Button type="button" variant="" className="rmp-auth-btn rmp-login-btn" onClick={() => navigate('/login')}>Log In</Button>
+							<Button type="button" variant="outline-light" className="rmp-auth-btn" onClick={() => navigate('/signup')}>Sign Up</Button>
+						</>
+					)}
 				</div>
 			</div>
 		</header>

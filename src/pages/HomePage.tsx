@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Alert, Button, Form, Spinner } from 'react-bootstrap'
 import { collection, getDocs } from 'firebase/firestore'
+import { useLocation, useNavigate } from 'react-router-dom'
 import SearchInput from '../components/SearchInput'
 import { db } from '../firebase'
 import './HomePage.css'
@@ -14,6 +15,9 @@ interface Roommate {
 }
 
 export default function HomePage() {
+  const navigate = useNavigate()
+  const routeLocation = useLocation()
+  const feedback = (routeLocation.state as { feedback?: string } | null)?.feedback ?? ''
   const [location, setLocation] = useState('')
   const [name, setName] = useState('')
   const [roommates, setRoommates] = useState<Roommate[]>([])
@@ -62,6 +66,18 @@ export default function HomePage() {
     <div className="home-page">
       <div className="home-content">
         <h1 className="home-title">Rate my Roommates</h1>
+
+        {feedback ? (
+          <Alert
+            variant="success"
+            dismissible
+            onClose={() => navigate(routeLocation.pathname, { replace: true })}
+            className="search-feedback"
+          >
+            {feedback}
+          </Alert>
+        ) : null}
+
         <Form className="search-area-form" onSubmit={handleSearch}>
           <SearchInput
             id="locationSearch"

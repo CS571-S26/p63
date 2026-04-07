@@ -1,0 +1,42 @@
+.rmp-profile-icon-btn {
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid #d4d4d4 !important;
+  border-radius: 999px !important;
+  background-color: #111 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+}
+
+.rmp-profile-icon-btn.dropdown-toggle::after {
+  display: none !important;
+}
+
+.rmp-profile-icon-btn:hover,
+.rmp-profile-icon-btn:focus-visible,
+.rmp-profile-icon-btn:active,
+.rmp-profile-icon-btn.show {
+  background-color: #2b2b2b !important;
+}
+
+.rmp-user-icon {
+  width: 1.22rem;
+  height: 1.22rem;
+  color: #fff;
+}
+
+.rmp-user-menu {
+  min-width: 10rem;
+  border-radius: 0.75rem;
+  border: 1px solid #d8d8d8;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14);
+}
+
+@media (max-width: 640px) {
+  .rmp-profile-icon-btn {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+}
