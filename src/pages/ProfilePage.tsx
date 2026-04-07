@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Alert, Button, Card, Form, Spinner } from 'react-bootstrap'
+import { Alert, Button, Form, Spinner } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { auth, db } from '../firebase'
+import UserPanelCard from '../components/UserPanelCard'
 import './ProfilePage.css'
 
 export default function ProfilePage() {
@@ -97,20 +98,17 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="profile-page">
-        <Card className="profile-card">
-          <Card.Body className="text-center py-5">
+        <UserPanelCard className="profile-card" bodyClassName="text-center py-5">
             <Spinner animation="border" />
             <p className="mt-3 mb-0 text-muted">Loading profile...</p>
-          </Card.Body>
-        </Card>
+        </UserPanelCard>
       </div>
     )
   }
 
   return (
     <div className="profile-page">
-      <Card className="profile-card">
-        <Card.Body>
+      <UserPanelCard className="profile-card">
           <div className="profile-header-row">
             <div>
               <h1 className="profile-title">My Profile</h1>
@@ -167,8 +165,7 @@ export default function ProfilePage() {
               </Button>
             </div>
           </Form>
-        </Card.Body>
-      </Card>
+      </UserPanelCard>
     </div>
   )
 }

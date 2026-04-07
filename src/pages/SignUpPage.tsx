@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Button, Card, Form, Alert, Spinner } from 'react-bootstrap'
+import { Button, Form, Alert, Spinner } from 'react-bootstrap'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../firebase'
 import { useNavigate } from 'react-router-dom'
+import UserPanelCard from '../components/UserPanelCard'
 import './SignUpPage.css'
 
 const steps = ['Account', 'Profile', 'Bio', 'Review']
@@ -96,8 +97,7 @@ export default function SignUpPage() {
 
   return (
     <div className="signup-page">
-      <Card className="signup-card">
-        <Card.Body>
+      <UserPanelCard className="signup-card">
           <h1 className="signup-title">Sign Up</h1>
           <p className="signup-subtitle">Join Rate My Roommates in a few quick steps.</p>
 
@@ -204,8 +204,7 @@ export default function SignUpPage() {
               </Button>
             )}
           </div>
-        </Card.Body>
-      </Card>
+      </UserPanelCard>
     </div>
   )
 }
