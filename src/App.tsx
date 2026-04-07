@@ -8,6 +8,7 @@ import { Route, Routes } from 'react-router'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
+import SignUpPage from './pages/SignUpPage'
 import TestPage from './pages/TestPage'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
       <Route element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
         <Route path="/test" element={<TestPage />} />
       </Route>
     </Routes>

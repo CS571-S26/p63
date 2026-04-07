@@ -15,7 +15,7 @@ export default function Navbar() {
 
 				<div className="d-flex align-items-center gap-2">
 					<Button type="button" variant="" className="rmp-auth-btn rmp-login-btn" onClick={() => navigate('/login')}>Log In</Button>
-					<Button type="button" variant="outline-light" className="rmp-auth-btn">Sign Up</Button>
+					<Button type="button" variant="outline-light" className="rmp-auth-btn" onClick={() => navigate('/signup')}>Sign Up</Button>
 				</div>
 			</div>
 		</header>

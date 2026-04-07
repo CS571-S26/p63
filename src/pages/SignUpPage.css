@@ -1,0 +1,134 @@
+.signup-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.signup-card {
+  width: min(760px, 100%);
+  border: 1px solid #d9dde3;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.signup-title {
+  margin: 0;
+  font-size: 1.95rem;
+  text-align: center;
+}
+
+.signup-subtitle {
+  margin: 0.55rem 0 1.25rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.signup-stepper {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 1.1rem;
+}
+
+.signup-step {
+  border: 1px solid #cfd4dc;
+  border-radius: 10px;
+  padding: 0.45rem 0.35rem;
+  text-align: center;
+  background: #f7f8fa;
+}
+
+.signup-step-index {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.signup-step-label {
+  display: block;
+  font-size: 0.79rem;
+  font-weight: 600;
+}
+
+.signup-step.is-active {
+  border-color: #212529;
+  background: #eef0f2;
+}
+
+.signup-step.is-active .signup-step-index {
+  background: #212529;
+  color: #fff;
+}
+
+.signup-step.is-done {
+  border-color: #198754;
+  background: #eef8f2;
+}
+
+.signup-step.is-done .signup-step-index {
+  background: #198754;
+  color: #fff;
+}
+
+.signup-step.is-upcoming .signup-step-index {
+  background: #d2d7dd;
+  color: #212529;
+}
+
+.signup-panel {
+  border: 1px solid #e2e6ea;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.signup-panel-title {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.signup-panel-subtitle {
+  margin: 0.3rem 0 0.95rem;
+  color: #6c757d;
+}
+
+.signup-review p {
+  margin-bottom: 0.45rem;
+}
+
+.signup-review-note {
+  margin-top: 0.7rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.signup-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 640px) {
+  .signup-page {
+    min-height: calc(100vh - 56px);
+  }
+
+  .signup-stepper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .signup-actions {
+    gap: 0.5rem;
+  }
+
+  .signup-actions button {
+    flex: 1;
+  }
+}
