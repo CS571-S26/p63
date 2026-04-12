@@ -33,9 +33,28 @@
   margin-top: 0.5rem;
 }
 
+.search-loading-state {
+  margin-top: 1rem;
+  text-align: center;
+  color: #4b5563;
+}
+
 .search-feedback {
   margin-top: 1rem;
   text-align: center;
+}
+
+.search-empty-state {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.search-add-hint {
+  text-align: center;
+  color: #6b7280;
 }
 
 .search-results {

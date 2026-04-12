@@ -1,0 +1,82 @@
+.add-roommate-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.5rem 1rem 3rem;
+  background: linear-gradient(180deg, #f5f7fb 0%, #edf1f5 100%);
+}
+
+.add-roommate-card {
+  width: min(980px, 100%);
+}
+
+.add-roommate-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.add-roommate-title {
+  margin: 0;
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
+}
+
+.add-roommate-subtitle {
+  margin: 0.45rem 0 0;
+  color: #607080;
+}
+
+.add-roommate-average-pill {
+  border-radius: 999px;
+  padding: 0.6rem 0.95rem;
+  background: #111827;
+  color: #fff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.add-roommate-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+}
+
+.rating-category-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.add-roommate-description-group {
+  margin-top: 1.2rem;
+}
+
+.add-roommate-actions {
+  margin-top: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .add-roommate-page {
+    min-height: calc(100vh - 56px);
+    padding: 1rem 0.75rem 2rem;
+  }
+
+  .add-roommate-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-roommate-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .add-roommate-actions button {
+    flex: 1;
+  }
+}

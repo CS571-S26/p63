@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Alert, Button, Form, Spinner } from 'react-bootstrap'
 import { collection, getDocs } from 'firebase/firestore'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -8,6 +8,7 @@ import './HomePage.css'
 
 interface Roommate {
   id: string
+  source: 'user' | 'roommate'
   name?: string
   location?: string
   rating?: number
@@ -18,30 +19,79 @@ export default function HomePage() {
   const navigate = useNavigate()
   const routeLocation = useLocation()
   const feedback = (routeLocation.state as { feedback?: string } | null)?.feedback ?? ''
+  const searchRequestId = useRef(0)
   const [location, setLocation] = useState('')
   const [name, setName] = useState('')
   const [roommates, setRoommates] = useState<Roommate[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [hasSearched, setHasSearched] = useState(false)
 
-  async function handleSearch(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  const hasSearchTerms = Boolean(location.trim() || name.trim())
+  const canAddRoommate = Boolean(location.trim() && name.trim())
 
+  function handleAddRoommate() {
+    const searchParams = new URLSearchParams({
+      name: name.trim(),
+      location: location.trim(),
+    })
+
+    navigate(`/roommates/new?${searchParams.toString()}`)
+  }
+
+  async function runSearch() {
     const locationTerm = location.trim().toLowerCase()
     const nameTerm = name.trim().toLowerCase()
 
     if (!locationTerm && !nameTerm) {
-      setError('Enter a location or a name to search.')
+      setError('')
       setRoommates([])
+      setHasSearched(false)
+      setLoading(false)
       return
     }
+
+    const requestId = ++searchRequestId.current
 
     try {
       setLoading(true)
       setError('')
 
-      const snapshot = await getDocs(collection(db, 'users'))
-      const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Roommate[]
+      const [usersResult, roommatesResult] = await Promise.allSettled([
+        getDocs(collection(db, 'users')),
+        getDocs(collection(db, 'roommates')),
+      ])
+
+      if (usersResult.status !== 'fulfilled') {
+        throw usersResult.reason
+      }
+
+      const users = usersResult.value.docs.map((doc) => ({
+        id: doc.id,
+        source: 'user' as const,
+        ...doc.data(),
+      })) as Roommate[]
+
+      const roommateEntries = roommatesResult.status === 'fulfilled'
+        ? roommatesResult.value.docs.map((doc) => {
+            const data = doc.data()
+
+            return {
+              id: `roommate-${doc.id}`,
+              source: 'roommate' as const,
+              name: data.name as string | undefined,
+              location: data.location as string | undefined,
+              rating: typeof data.averageRating === 'number' ? data.averageRating : undefined,
+              bio: data.description as string | undefined,
+            }
+          })
+        : []
+
+      if (requestId !== searchRequestId.current) {
+        return
+      }
+
+      const docs = [...users, ...roommateEntries]
 
       const filtered = docs.filter((roommate) => {
         const roommateLocation = (roommate.location ?? '').toLowerCase()
@@ -54,13 +104,43 @@ export default function HomePage() {
       })
 
       setRoommates(filtered)
+      setHasSearched(true)
     } catch {
+      if (requestId !== searchRequestId.current) {
+        return
+      }
+
       setError('Could not load roommate results from Firebase right now.')
       setRoommates([])
+      setHasSearched(false)
     } finally {
-      setLoading(false)
+      if (requestId === searchRequestId.current) {
+        setLoading(false)
+      }
     }
   }
+
+  useEffect(() => {
+    const locationTerm = location.trim()
+    const nameTerm = name.trim()
+
+    if (!locationTerm && !nameTerm) {
+      setRoommates([])
+      setError('')
+      setHasSearched(false)
+      setLoading(false)
+      searchRequestId.current += 1
+      return
+    }
+
+    setHasSearched(false)
+
+    const timeoutId = window.setTimeout(() => {
+      void runSearch()
+    }, 300)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [location, name])
 
   return (
     <div className="home-page">
@@ -78,7 +158,7 @@ export default function HomePage() {
           </Alert>
         ) : null}
 
-        <Form className="search-area-form" onSubmit={handleSearch}>
+        <Form className="search-area-form">
           <SearchInput
             id="locationSearch"
             placeholder="Type your street address, city, state, or 5-digit ZIP code..."
@@ -92,20 +172,14 @@ export default function HomePage() {
             value={name}
             onChange={setName}
           />
-
-          <div className="search-actions">
-            <Button type="submit" variant="dark" disabled={loading}>
-              {loading ? (
-                <>
-                  <Spinner as="span" animation="border" size="sm" className="me-2" />
-                  Searching...
-                </>
-              ) : (
-                'Search'
-              )}
-            </Button>
-          </div>
         </Form>
+
+        {loading ? (
+          <div className="search-loading-state">
+            <Spinner as="span" animation="border" size="sm" className="me-2" />
+            Searching...
+          </div>
+        ) : null}
 
         {error ? (
           <Alert variant="danger" className="search-feedback">{error}</Alert>
@@ -117,15 +191,25 @@ export default function HomePage() {
               <article key={roommate.id} className="result-card">
                 <h3>{roommate.name ?? 'Unnamed roommate'}</h3>
                 <p><strong>Location:</strong> {roommate.location ?? 'Not provided'}</p>
-                <p><strong>Rating:</strong> {roommate.rating ?? 'N/A'}</p>
+                <p><strong>Rating:</strong> {typeof roommate.rating === 'number' ? roommate.rating.toFixed(1) : 'N/A'}</p>
+                <p><strong>Source:</strong> {roommate.source === 'user' ? 'User profile' : 'Roommate review'}</p>
                 {roommate.bio ? <p>{roommate.bio}</p> : null}
               </article>
             ))}
           </div>
         ) : null}
 
-        {!loading && !error && roommates.length === 0 && (location || name) ? (
-          <p className="search-feedback text-muted">No matching roommates found.</p>
+        {!loading && !error && hasSearched && roommates.length === 0 && hasSearchTerms ? (
+          <div className="search-empty-state">
+            <p className="search-feedback text-muted mb-2">No matching roommates found.</p>
+            {canAddRoommate ? (
+              <Button type="button" variant="outline-dark" onClick={handleAddRoommate}>
+                Add this roommate
+              </Button>
+            ) : (
+              <p className="search-add-hint mb-0">To add a roommate, search with both their name and the location where you lived together.</p>
+            )}
+          </div>
         ) : null}
       </div>
     </div>

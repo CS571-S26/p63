@@ -7,6 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { Route, Routes } from 'react-router'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import AddRoommatePage from './pages/AddRoommatePage'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
@@ -22,6 +23,7 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/roommates/new" element={<ProtectedRoute><AddRoommatePage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/test" element={<TestPage />} />
       </Route>
