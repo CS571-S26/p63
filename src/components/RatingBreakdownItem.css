@@ -1,0 +1,28 @@
+.rating-breakdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #e3e7ee;
+  border-radius: 0.95rem;
+  padding: 0.8rem 0.9rem;
+  background: #fff;
+}
+
+.rating-breakdown-item h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  color: #111827;
+}
+
+.rating-breakdown-pill {
+  min-width: 3.15rem;
+  border-radius: 0.6rem;
+  padding: 0.25rem 0.55rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  background: #83e9be;
+  color: #0f172a;
+}

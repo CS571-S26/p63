@@ -1,0 +1,119 @@
+.roommate-details-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 1rem 2rem;
+  background: linear-gradient(180deg, #f4f7fb 0%, #ebf0f4 100%);
+}
+
+.roommate-details-card {
+  width: min(1050px, 100%);
+}
+
+.roommate-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.roommate-details-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.7rem);
+}
+
+.roommate-details-header p {
+  margin: 0.2rem 0 0;
+  font-size: 1.25rem;
+  color: #667085;
+}
+
+.roommate-ratings-section {
+  display: grid;
+  grid-template-columns: minmax(210px, 250px) minmax(0, 1fr);
+  gap: 1rem;
+  border: 1px solid #dee4ec;
+  border-radius: 1.05rem;
+  padding: 1rem;
+  background: #f8fafc;
+}
+
+.roommate-overall-rating {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.roommate-overall-number {
+  font-size: clamp(3.2rem, 7vw, 4.7rem);
+  font-weight: 800;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.roommate-overall-label {
+  margin-top: 0.45rem;
+  font-size: 1.05rem;
+  color: #6b7280;
+}
+
+.roommate-rating-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.roommate-no-ratings {
+  color: #6b7280;
+  align-self: center;
+}
+
+.roommate-description-section {
+  margin-top: 1rem;
+  border: 1px solid #e3e8ef;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 0.95rem 1rem;
+}
+
+.roommate-description-section h2 {
+  margin: 0 0 0.45rem;
+  font-size: 1.1rem;
+}
+
+.roommate-description-section p {
+  margin: 0;
+  color: #374151;
+}
+
+@media (max-width: 880px) {
+  .roommate-ratings-section {
+    grid-template-columns: 1fr;
+  }
+
+  .roommate-rating-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .roommate-details-page {
+    min-height: calc(100vh - 56px);
+    padding: 1rem 0.75rem 1.5rem;
+  }
+
+  .roommate-details-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .roommate-details-header button {
+    width: 100%;
+  }
+}

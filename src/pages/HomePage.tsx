@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { Alert, Button, Form, Spinner } from 'react-bootstrap'
+import { onAuthStateChanged } from 'firebase/auth'
 import { collection, getDocs } from 'firebase/firestore'
 import { useLocation, useNavigate } from 'react-router-dom'
 import SearchInput from '../components/SearchInput'
-import { db } from '../firebase'
+import { auth, db } from '../firebase'
 import './HomePage.css'
 
 interface Roommate {
   id: string
+  entryId: string
   source: 'user' | 'roommate'
   name?: string
   location?: string
@@ -26,17 +28,35 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [hasSearched, setHasSearched] = useState(false)
+  const [isSignedIn, setIsSignedIn] = useState(false)
 
   const hasSearchTerms = Boolean(location.trim() || name.trim())
   const canAddRoommate = Boolean(location.trim() && name.trim())
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsSignedIn(Boolean(user))
+    })
+
+    return () => unsubscribe()
+  }, [])
+
   function handleAddRoommate() {
+    if (!isSignedIn) {
+      navigate('/login')
+      return
+    }
+
     const searchParams = new URLSearchParams({
       name: name.trim(),
       location: location.trim(),
     })
 
     navigate(`/roommates/new?${searchParams.toString()}`)
+  }
+
+  function handleOpenDetails(roommate: Roommate) {
+    navigate(`/roommates/${roommate.source}/${roommate.entryId}`)
   }
 
   async function runSearch() {
@@ -67,7 +87,8 @@ export default function HomePage() {
       }
 
       const users = usersResult.value.docs.map((doc) => ({
-        id: doc.id,
+        id: `user-${doc.id}`,
+        entryId: doc.id,
         source: 'user' as const,
         ...doc.data(),
       })) as Roommate[]
@@ -78,6 +99,7 @@ export default function HomePage() {
 
             return {
               id: `roommate-${doc.id}`,
+              entryId: doc.id,
               source: 'roommate' as const,
               name: data.name as string | undefined,
               location: data.location as string | undefined,
@@ -188,13 +210,18 @@ export default function HomePage() {
         {!loading && !error && roommates.length > 0 ? (
           <div className="search-results">
             {roommates.map((roommate) => (
-              <article key={roommate.id} className="result-card">
+              <button
+                key={roommate.id}
+                type="button"
+                className="result-card result-card-button"
+                onClick={() => handleOpenDetails(roommate)}
+              >
                 <h3>{roommate.name ?? 'Unnamed roommate'}</h3>
                 <p><strong>Location:</strong> {roommate.location ?? 'Not provided'}</p>
                 <p><strong>Rating:</strong> {typeof roommate.rating === 'number' ? roommate.rating.toFixed(1) : 'N/A'}</p>
                 <p><strong>Source:</strong> {roommate.source === 'user' ? 'User profile' : 'Roommate review'}</p>
                 {roommate.bio ? <p>{roommate.bio}</p> : null}
-              </article>
+              </button>
             ))}
           </div>
         ) : null}
@@ -204,7 +231,7 @@ export default function HomePage() {
             <p className="search-feedback text-muted mb-2">No matching roommates found.</p>
             {canAddRoommate ? (
               <Button type="button" variant="outline-dark" onClick={handleAddRoommate}>
-                Add this roommate
+                {isSignedIn ? 'Add this roommate' : 'Sign in to rate this roommate'}
               </Button>
             ) : (
               <p className="search-add-hint mb-0">To add a roommate, search with both their name and the location where you lived together.</p>
