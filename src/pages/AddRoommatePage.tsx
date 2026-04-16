@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Alert, Button, Form, Spinner } from 'react-bootstrap'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { addDoc, collection, doc, getDocs, limit, query, runTransaction, serverTimestamp, where } from 'firebase/firestore'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import RatingCategoryCard from '../components/RatingCategoryCard'
 import UserPanelCard from '../components/UserPanelCard'
@@ -29,6 +29,9 @@ const initialRatings = ratingCategories.reduce((accumulator, category) => {
 export default function AddRoommatePage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const targetRoommateId = searchParams.get('roommateId') ?? ''
+  const subjectUserId = searchParams.get('subjectUserId') ?? ''
+  const lockIdentity = searchParams.get('lockIdentity') === '1'
   const [name, setName] = useState(searchParams.get('name') ?? '')
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
   const [description, setDescription] = useState('')
@@ -53,6 +56,18 @@ export default function AddRoommatePage() {
     event.preventDefault()
     setError('')
 
+    const currentUserId = auth.currentUser?.uid ?? ''
+
+    if (!currentUserId) {
+      setError('You must be signed in to submit a rating.')
+      return
+    }
+
+    if (subjectUserId && subjectUserId === currentUserId) {
+      setError('You cannot rate yourself.')
+      return
+    }
+
     const trimmedName = name.trim()
     const trimmedLocation = location.trim()
     const trimmedDescription = description.trim()
@@ -70,18 +85,133 @@ export default function AddRoommatePage() {
     setSaving(true)
 
     try {
-      await addDoc(collection(db, 'roommates'), {
-        name: trimmedName,
-        location: trimmedLocation,
-        description: trimmedDescription,
-        ratings,
-        averageRating: Number(averageRating.toFixed(1)),
-        createdAt: serverTimestamp(),
-        createdBy: auth.currentUser?.uid ?? null,
-      })
+      let effectiveTargetRoommateId = targetRoommateId
+
+      if (!effectiveTargetRoommateId) {
+        if (subjectUserId) {
+          const subjectMatch = await getDocs(
+            query(collection(db, 'roommates'), where('subjectUserId', '==', subjectUserId), limit(1)),
+          )
+
+          if (!subjectMatch.empty) {
+            effectiveTargetRoommateId = subjectMatch.docs[0].id
+          }
+        } else {
+          const normalizedSubjectKey = `${trimmedName.toLowerCase()}|${trimmedLocation.toLowerCase()}`
+          const keyMatch = await getDocs(
+            query(collection(db, 'roommates'), where('subjectKey', '==', normalizedSubjectKey), limit(1)),
+          )
+
+          if (!keyMatch.empty) {
+            effectiveTargetRoommateId = keyMatch.docs[0].id
+          }
+        }
+      }
+
+      if (effectiveTargetRoommateId) {
+        await runTransaction(db, async (transaction) => {
+          const roommateRef = doc(db, 'roommates', effectiveTargetRoommateId)
+          const roommateSnapshot = await transaction.get(roommateRef)
+
+          if (!roommateSnapshot.exists()) {
+            throw new Error('target-roommate-missing')
+          }
+
+          const existingData = roommateSnapshot.data()
+          const existingSubjectUserId = typeof existingData.subjectUserId === 'string' ? existingData.subjectUserId : ''
+
+          if (existingSubjectUserId && existingSubjectUserId === currentUserId) {
+            throw new Error('cannot-rate-self')
+          }
+
+          const existingRatedBy = Array.isArray(existingData.ratedBy)
+            ? existingData.ratedBy.filter((value): value is string => typeof value === 'string')
+            : []
+
+          if (existingRatedBy.includes(currentUserId)) {
+            throw new Error('already-rated')
+          }
+
+          const existingRatings = (existingData.ratings as Partial<RatingsState> | undefined) ?? {}
+          const existingTotals = (existingData.ratingTotals as Partial<RatingsState> | undefined) ?? {}
+          const existingCount =
+            typeof existingData.ratingCount === 'number' && existingData.ratingCount > 0
+              ? existingData.ratingCount
+              : 1
+
+          const nextTotals = { ...initialRatings }
+
+          for (const category of ratingCategories) {
+            const key = category.key
+            const existingAverage = typeof existingRatings[key] === 'number' ? existingRatings[key] : 3
+            const fallbackTotal = existingAverage * existingCount
+            const currentTotal = typeof existingTotals[key] === 'number' ? existingTotals[key] : fallbackTotal
+
+            nextTotals[key] = Number((currentTotal + ratings[key]).toFixed(4))
+          }
+
+          const nextCount = existingCount + 1
+          const nextRatings = { ...initialRatings }
+
+          for (const category of ratingCategories) {
+            const key = category.key
+            nextRatings[key] = Number((nextTotals[key] / nextCount).toFixed(1))
+          }
+
+          const overall = Object.values(nextRatings).reduce((sum, value) => sum + value, 0) / ratingCategories.length
+
+          transaction.update(roommateRef, {
+            name: trimmedName,
+            location: trimmedLocation,
+            ratings: nextRatings,
+            ratingTotals: nextTotals,
+            ratingCount: nextCount,
+            ratedBy: [...existingRatedBy, currentUserId],
+            averageRating: Number(overall.toFixed(1)),
+            description: trimmedDescription,
+            updatedAt: serverTimestamp(),
+            updatedBy: currentUserId,
+          })
+        })
+      } else {
+        const normalizedSubjectKey = `${trimmedName.toLowerCase()}|${trimmedLocation.toLowerCase()}`
+
+        await addDoc(collection(db, 'roommates'), {
+          name: trimmedName,
+          location: trimmedLocation,
+          subjectUserId: subjectUserId || null,
+          subjectKey: normalizedSubjectKey,
+          description: trimmedDescription,
+          ratings,
+          ratingTotals: ratings,
+          ratingCount: 1,
+          ratedBy: [currentUserId],
+          averageRating: Number(averageRating.toFixed(1)),
+          createdAt: serverTimestamp(),
+          createdBy: currentUserId,
+        })
+      }
 
       navigate('/', { state: { feedback: `Saved a review for ${trimmedName}.` } })
     } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'target-roommate-missing') {
+        setError('That roommate review no longer exists. Please return to search and try again.')
+        setSaving(false)
+        return
+      }
+
+      if (error instanceof Error && error.message === 'already-rated') {
+        setError('You have already rated this roommate.')
+        setSaving(false)
+        return
+      }
+
+      if (error instanceof Error && error.message === 'cannot-rate-self') {
+        setError('You cannot rate yourself.')
+        setSaving(false)
+        return
+      }
+
       const code = (error as { code?: string }).code ?? ''
 
       if (code === 'permission-denied') {
@@ -116,6 +246,7 @@ export default function AddRoommatePage() {
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="Enter their full name"
+                disabled={lockIdentity}
               />
             </Form.Group>
 
@@ -126,6 +257,7 @@ export default function AddRoommatePage() {
                 value={location}
                 onChange={(event) => setLocation(event.target.value)}
                 placeholder="City, State or address"
+                disabled={lockIdentity}
               />
             </Form.Group>
           </div>

@@ -13,7 +13,6 @@ import LoginPage from './pages/LoginPage'
 import ProfilePage from './pages/ProfilePage'
 import RoommateDetailsPage from './pages/RoommateDetailsPage'
 import SignUpPage from './pages/SignUpPage'
-import TestPage from './pages/TestPage'
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -27,7 +26,7 @@ function App() {
         <Route path="/roommates/new" element={<ProtectedRoute><AddRoommatePage /></ProtectedRoute>} />
         <Route path="/roommates/:source/:entryId" element={<RoommateDetailsPage />} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/test" element={<TestPage />} />
+        {/* <Route path="/test" element={<TestPage />} /> */}
       </Route>
     </Routes>
 

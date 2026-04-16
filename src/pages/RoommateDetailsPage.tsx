@@ -46,11 +46,13 @@ export default function RoommateDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isSignedIn, setIsSignedIn] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState('')
   const [details, setDetails] = useState<RoommateDetails | null>(null)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsSignedIn(Boolean(user))
+      setCurrentUserId(user?.uid ?? '')
     })
 
     return () => unsubscribe()
@@ -139,10 +141,25 @@ export default function RoommateDetailsPage() {
   function handleRateRoommate() {
     if (!details) return
 
+    const isSelfUserEntry = source === 'user' && entryId && currentUserId && entryId === currentUserId
+
+    if (isSelfUserEntry) {
+      return
+    }
+
     const query = new URLSearchParams({
       name: details.name,
       location: details.location,
+      lockIdentity: '1',
     })
+
+    if (source === 'roommate' && entryId) {
+      query.set('roommateId', entryId)
+    }
+
+    if (source === 'user' && entryId) {
+      query.set('subjectUserId', entryId)
+    }
 
     if (!isSignedIn) {
       navigate('/login')
@@ -173,6 +190,8 @@ export default function RoommateDetailsPage() {
     )
   }
 
+  const isSelfUserEntry = source === 'user' && entryId && currentUserId && entryId === currentUserId
+
   return (
     <div className="roommate-details-page">
       <UserPanelCard className="roommate-details-card">
@@ -181,8 +200,8 @@ export default function RoommateDetailsPage() {
             <h1>{details.name}</h1>
             <p>{details.location}</p>
           </div>
-          <Button type="button" variant="dark" onClick={handleRateRoommate}>
-            {isSignedIn ? 'Rate This Roommate' : 'Sign In To Rate'}
+          <Button type="button" variant="dark" onClick={handleRateRoommate} disabled={Boolean(isSelfUserEntry)}>
+            {isSelfUserEntry ? 'You Cannot Rate Yourself' : isSignedIn ? 'Rate This Roommate' : 'Sign In To Rate'}
           </Button>
         </div>
 
