@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Alert, Button, Form, Spinner } from 'react-bootstrap'
 import { onAuthStateChanged } from 'firebase/auth'
 import { collection, getDocs } from 'firebase/firestore'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import SearchInput from '../components/SearchInput'
 import { auth, db } from '../firebase'
 import './HomePage.css'
@@ -20,10 +20,11 @@ interface Roommate {
 export default function HomePage() {
   const navigate = useNavigate()
   const routeLocation = useLocation()
+  const [searchParams] = useSearchParams()
   const feedback = (routeLocation.state as { feedback?: string } | null)?.feedback ?? ''
   const searchRequestId = useRef(0)
-  const [location, setLocation] = useState('')
-  const [name, setName] = useState('')
+  const [location, setLocation] = useState(searchParams.get('location') ?? '')
+  const [name, setName] = useState(searchParams.get('name') ?? '')
   const [roommates, setRoommates] = useState<Roommate[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
