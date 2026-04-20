@@ -101,7 +101,7 @@ export default function AddRoommatePage() {
         reviewerName = auth.currentUser?.displayName || auth.currentUser?.email || 'Anonymous Reviewer'
       }
 
-      let effectiveTargetRoommateId = targetRoommateId
+      let effectiveTargetRoommateId: string = targetRoommateId
 
       if (!effectiveTargetRoommateId) {
         if (subjectUserId) {
@@ -227,9 +227,10 @@ export default function AddRoommatePage() {
         })
 
         await batch.commit()
+        effectiveTargetRoommateId = newRoommateRef.id
       }
 
-      navigate('/', { state: { feedback: `Saved a review for ${trimmedName}.` } })
+      navigate(`/roommates/roommate/${effectiveTargetRoommateId}`, { state: { feedback: `Your rating for ${trimmedName} has been saved.` } })
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'target-roommate-missing') {
         setError('That roommate review no longer exists. Please return to search and try again.')

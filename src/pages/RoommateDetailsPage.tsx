@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Spinner } from 'react-bootstrap'
 import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import RatingBreakdownItem from '../components/RatingBreakdownItem'
 import UserPanelCard from '../components/UserPanelCard'
 import { auth, db } from '../firebase'
@@ -16,6 +16,7 @@ interface RoommateDetails {
   description: string
   averageRating: number | null
   ratings: RatingsMap
+  ratedBy: string[]
 }
 
 interface IndividualReview {
@@ -50,7 +51,9 @@ const ratingOrder = [
 
 export default function RoommateDetailsPage() {
   const navigate = useNavigate()
+  const routeLocation = useLocation()
   const { source, entryId } = useParams()
+  const feedback = (routeLocation.state as { feedback?: string } | null)?.feedback ?? ''
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isSignedIn, setIsSignedIn] = useState(false)
@@ -97,12 +100,17 @@ export default function RoommateDetailsPage() {
               ? ratingValues.reduce((sum, value) => sum + value, 0) / ratingValues.length
               : null
 
+          const ratedBy = Array.isArray(data.ratedBy)
+            ? data.ratedBy.filter((value): value is string => typeof value === 'string')
+            : []
+
           setDetails({
             name: (data.name as string | undefined) ?? 'Unnamed roommate',
             location: (data.location as string | undefined) ?? 'Location not provided',
             description: (data.description as string | undefined) ?? '',
             averageRating,
             ratings,
+            ratedBy,
           })
 
           // Load individual reviews
@@ -142,6 +150,7 @@ export default function RoommateDetailsPage() {
             description: (data.bio as string | undefined) ?? '',
             averageRating: typeof data.rating === 'number' ? data.rating : null,
             ratings: {},
+            ratedBy: [],
           })
         } else {
           setError('Unsupported roommate entry type.')
@@ -155,6 +164,14 @@ export default function RoommateDetailsPage() {
 
     void loadDetails()
   }, [entryId, source])
+
+  const hasAlreadyRated = useMemo(() => {
+    if (!currentUserId || !details) return false
+    if (source === 'roommate') {
+      return details.ratedBy.includes(currentUserId)
+    }
+    return false
+  }, [currentUserId, details, source])
 
   const orderedRatings = useMemo(() => {
     if (!details) return []
@@ -225,13 +242,35 @@ export default function RoommateDetailsPage() {
   return (
     <div className="roommate-details-page">
       <UserPanelCard className="roommate-details-card">
+        {feedback ? (
+          <Alert
+            variant="success"
+            dismissible
+            onClose={() => navigate(routeLocation.pathname, { replace: true })}
+            className="roommate-feedback-alert mb-3"
+          >
+            {feedback}
+          </Alert>
+        ) : null}
+
         <div className="roommate-details-header">
           <div>
             <h1>{details.name}</h1>
             <p>{details.location}</p>
           </div>
-          <Button type="button" variant="dark" onClick={handleRateRoommate} disabled={Boolean(isSelfUserEntry)}>
-            {isSelfUserEntry ? 'You Cannot Rate Yourself' : isSignedIn ? 'Rate This Roommate' : 'Sign In To Rate'}
+          <Button
+            type="button"
+            variant="dark"
+            onClick={handleRateRoommate}
+            disabled={Boolean(isSelfUserEntry) || (source === 'roommate' && hasAlreadyRated)}
+          >
+            {isSelfUserEntry
+              ? 'You Cannot Rate Yourself'
+              : source === 'roommate' && hasAlreadyRated
+                ? 'You\'ve Already Rated This Roommate'
+                : isSignedIn
+                  ? 'Rate This Roommate'
+                  : 'Sign In To Rate'}
           </Button>
         </div>
 

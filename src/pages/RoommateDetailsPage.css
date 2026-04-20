@@ -10,6 +10,12 @@
   width: min(1050px, 100%);
 }
 
+.roommate-feedback-alert {
+  border-radius: 0.8rem;
+  border: none;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
+}
+
 .roommate-details-header {
   display: flex;
   justify-content: space-between;
