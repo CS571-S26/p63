@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Alert, Button, Form, Spinner } from 'react-bootstrap'
-import { addDoc, collection, doc, getDocs, limit, query, runTransaction, serverTimestamp, where } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, limit, query, runTransaction, serverTimestamp, where, writeBatch } from 'firebase/firestore'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import RatingCategoryCard from '../components/RatingCategoryCard'
 import UserPanelCard from '../components/UserPanelCard'
@@ -85,6 +85,22 @@ export default function AddRoommatePage() {
     setSaving(true)
 
     try {
+      // Resolve reviewer display name upfront
+      let reviewerName = 'Anonymous Reviewer'
+      try {
+        const userSnap = await getDoc(doc(db, 'users', currentUserId))
+        if (userSnap.exists()) {
+          const ud = userSnap.data()
+          const fn = typeof ud.firstName === 'string' ? ud.firstName : ''
+          const ln = typeof ud.lastName === 'string' ? ud.lastName : ''
+          reviewerName = [fn, ln].filter(Boolean).join(' ') || auth.currentUser?.displayName || auth.currentUser?.email || 'Anonymous Reviewer'
+        } else {
+          reviewerName = auth.currentUser?.displayName || auth.currentUser?.email || 'Anonymous Reviewer'
+        }
+      } catch {
+        reviewerName = auth.currentUser?.displayName || auth.currentUser?.email || 'Anonymous Reviewer'
+      }
+
       let effectiveTargetRoommateId = targetRoommateId
 
       if (!effectiveTargetRoommateId) {
@@ -172,11 +188,23 @@ export default function AddRoommatePage() {
             updatedAt: serverTimestamp(),
             updatedBy: currentUserId,
           })
+
+          const reviewRef = doc(db, 'roommates', effectiveTargetRoommateId, 'reviews', currentUserId)
+          transaction.set(reviewRef, {
+            ratings,
+            description: trimmedDescription,
+            reviewerName,
+            createdAt: serverTimestamp(),
+          })
         })
       } else {
         const normalizedSubjectKey = `${trimmedName.toLowerCase()}|${trimmedLocation.toLowerCase()}`
+        const newRoommateRef = doc(collection(db, 'roommates'))
+        const reviewRef = doc(db, 'roommates', newRoommateRef.id, 'reviews', currentUserId)
 
-        await addDoc(collection(db, 'roommates'), {
+        const batch = writeBatch(db)
+
+        batch.set(newRoommateRef, {
           name: trimmedName,
           location: trimmedLocation,
           subjectUserId: subjectUserId || null,
@@ -190,6 +218,15 @@ export default function AddRoommatePage() {
           createdAt: serverTimestamp(),
           createdBy: currentUserId,
         })
+
+        batch.set(reviewRef, {
+          ratings,
+          description: trimmedDescription,
+          reviewerName,
+          createdAt: serverTimestamp(),
+        })
+
+        await batch.commit()
       }
 
       navigate('/', { state: { feedback: `Saved a review for ${trimmedName}.` } })

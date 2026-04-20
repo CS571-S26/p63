@@ -117,3 +117,144 @@
     width: 100%;
   }
 }
+
+/* ── Individual Reviews ── */
+.roommate-reviews-section {
+  margin-top: 1rem;
+}
+
+.roommate-reviews-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 1.2rem;
+  margin: 0 0 0.85rem;
+}
+
+.roommate-reviews-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 999px;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.45rem;
+  line-height: 1;
+}
+
+.roommate-reviews-empty {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.roommate-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.roommate-review-card {
+  border: 1px solid #e3e8ef;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1rem 1.1rem;
+}
+
+.roommate-review-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.roommate-review-author {
+  font-weight: 700;
+  font-size: 0.97rem;
+  color: #111827;
+}
+
+.roommate-review-date {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.roommate-review-description {
+  margin: 0 0 0.75rem;
+  font-size: 0.92rem;
+  color: #374151;
+  line-height: 1.55;
+}
+
+.roommate-review-ratings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.roommate-review-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.roommate-review-rating-label {
+  font-size: 0.78rem;
+  color: #6b7280;
+  width: 7rem;
+  flex-shrink: 0;
+}
+
+.roommate-review-rating-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.roommate-review-rating-bar {
+  display: block;
+  height: 100%;
+  background: #83e9be;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.roommate-review-rating-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #374151;
+  width: 2.2rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.roommate-review-about {
+  margin-top: 0.85rem;
+  border: 1px solid #e6ebf2;
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, #f9fbfd 0%, #f5f8fb 100%);
+  padding: 0.75rem 0.85rem;
+}
+
+.roommate-review-about-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: #0f172a;
+}
+
+.roommate-review-about-text {
+  margin: 0.4rem 0 0;
+  color: #334155;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}

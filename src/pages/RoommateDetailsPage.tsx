@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Alert, Button, Spinner } from 'react-bootstrap'
-import { doc, getDoc } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useNavigate, useParams } from 'react-router-dom'
 import RatingBreakdownItem from '../components/RatingBreakdownItem'
@@ -16,6 +16,14 @@ interface RoommateDetails {
   description: string
   averageRating: number | null
   ratings: RatingsMap
+}
+
+interface IndividualReview {
+  id: string
+  reviewerName: string
+  description: string
+  ratings: RatingsMap
+  createdAt: Date | null
 }
 
 const ratingLabels: Record<string, string> = {
@@ -48,6 +56,7 @@ export default function RoommateDetailsPage() {
   const [isSignedIn, setIsSignedIn] = useState(false)
   const [currentUserId, setCurrentUserId] = useState('')
   const [details, setDetails] = useState<RoommateDetails | null>(null)
+  const [reviews, setReviews] = useState<IndividualReview[]>([])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -95,6 +104,27 @@ export default function RoommateDetailsPage() {
             averageRating,
             ratings,
           })
+
+          // Load individual reviews
+          try {
+            const reviewsSnap = await getDocs(
+              query(collection(db, 'roommates', entryId, 'reviews'), orderBy('createdAt', 'desc')),
+            )
+            setReviews(reviewsSnap.docs.map((reviewDoc) => {
+              const rd = reviewDoc.data()
+              const ts = rd.createdAt
+              return {
+                id: reviewDoc.id,
+                reviewerName: typeof rd.reviewerName === 'string' ? rd.reviewerName : 'Anonymous Reviewer',
+                description: typeof rd.description === 'string' ? rd.description : '',
+                ratings: (rd.ratings as RatingsMap | undefined) ?? {},
+                createdAt: ts && typeof ts.toDate === 'function' ? (ts.toDate() as Date) : null,
+              }
+            }))
+          } catch {
+            // Reviews subcollection failing shouldn't break the whole page
+            setReviews([])
+          }
         } else if (source === 'user') {
           const userSnapshot = await getDoc(doc(db, 'users', entryId))
 
@@ -228,10 +258,61 @@ export default function RoommateDetailsPage() {
           </div>
         </section>
 
-        <section className="roommate-description-section">
-          <h2>About This Roommate</h2>
-          <p>{details.description || 'No written description has been submitted yet.'}</p>
-        </section>
+        {source === 'roommate' && (
+          <section className="roommate-reviews-section">
+            <h2 className="roommate-reviews-heading">
+              Reviews
+              {reviews.length > 0 && (
+                <span className="roommate-reviews-count">{reviews.length}</span>
+              )}
+            </h2>
+
+            {reviews.length === 0 ? (
+              <p className="roommate-reviews-empty">No individual reviews yet.</p>
+            ) : (
+              <div className="roommate-reviews-list">
+                {reviews.map((review) => (
+                  <div key={review.id} className="roommate-review-card">
+                    <div className="roommate-review-card-header">
+                      <span className="roommate-review-author">{review.reviewerName}</span>
+                      {review.createdAt && (
+                        <span className="roommate-review-date">
+                          {review.createdAt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                      )}
+                    </div>
+
+                    {ratingOrder.some((key) => typeof review.ratings[key] === 'number') && (
+                      <div className="roommate-review-ratings">
+                        {ratingOrder
+                          .filter((key) => typeof review.ratings[key] === 'number')
+                          .map((key) => (
+                            <div key={key} className="roommate-review-rating-row">
+                              <span className="roommate-review-rating-label">{ratingLabels[key] ?? key}</span>
+                              <span className="roommate-review-rating-bar-wrap">
+                                <span
+                                  className="roommate-review-rating-bar"
+                                  style={{ width: `${((review.ratings[key] - 1) / 4) * 100}%` }}
+                                />
+                              </span>
+                              <span className="roommate-review-rating-value">{review.ratings[key].toFixed(1)}</span>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+
+                    <section className="roommate-review-about">
+                      <h3 className="roommate-review-about-title">About</h3>
+                      <p className="roommate-review-about-text">
+                        {review.description || 'No written notes for this review yet.'}
+                      </p>
+                    </section>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </UserPanelCard>
     </div>
   )
