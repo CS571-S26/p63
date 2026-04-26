@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../firebase'
 import { useNavigate } from 'react-router-dom'
+import LocationInput from '../components/LocationInput'
 import UserPanelCard from '../components/UserPanelCard'
 import './SignUpPage.css'
 
@@ -159,10 +160,13 @@ export default function SignUpPage() {
                   <Form.Control type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} />
                 </Form.Group>
 
-                <Form.Group className="mb-0" controlId="signupLocation">
-                  <Form.Label>Location</Form.Label>
-                  <Form.Control type="text" placeholder="City, State (e.g. Madison, WI)" value={location} onChange={(e) => setLocation(e.target.value)} />
-                </Form.Group>
+                <LocationInput
+                  id="signupLocation"
+                  label="Location"
+                  value={location}
+                  onChange={setLocation}
+                  placeholder="City, State (e.g. Madison, WI)"
+                />
               </>
             ) : null}
 

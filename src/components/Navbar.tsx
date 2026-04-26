@@ -30,7 +30,7 @@ export default function Navbar() {
 	const searchRequestId = useRef(0)
 	const wrapperRef = useRef<HTMLDivElement>(null)
 
-	const isHomePage = routeLocation.pathname === '/'
+	const hideSearch = ['/', '/login', '/signup'].includes(routeLocation.pathname)
 
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -161,7 +161,7 @@ export default function Navbar() {
 					<img src={rmrLogo} alt="Rate My Roommate" className="rmp-home-logo" />
 				</Link>
 
-				{!isHomePage && (
+				{!hideSearch && (
 					<div className="rmp-navbar-search" role="search" ref={wrapperRef}>
 						<div className="rmp-navbar-search-wrap">
 							<svg className="rmp-search-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

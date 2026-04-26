@@ -8,7 +8,7 @@ interface RatingBreakdownItemProps {
 export default function RatingBreakdownItem({ label, value }: RatingBreakdownItemProps) {
   return (
     <article className="rating-breakdown-item">
-      <h3>{label}</h3>
+      <p>{label}</p>
       <div className="rating-breakdown-pill">{value.toFixed(1)}</div>
     </article>
   )

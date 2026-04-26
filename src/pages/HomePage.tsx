@@ -22,6 +22,7 @@ export default function HomePage() {
   const routeLocation = useLocation()
   const [searchParams] = useSearchParams()
   const feedback = (routeLocation.state as { feedback?: string } | null)?.feedback ?? ''
+  const contentRef = useRef<HTMLDivElement>(null)
   const searchRequestId = useRef(0)
   const [location, setLocation] = useState(searchParams.get('location') ?? '')
   const [name, setName] = useState(searchParams.get('name') ?? '')
@@ -30,6 +31,7 @@ export default function HomePage() {
   const [error, setError] = useState('')
   const [hasSearched, setHasSearched] = useState(false)
   const [isSignedIn, setIsSignedIn] = useState(false)
+  const [contentTopOffset, setContentTopOffset] = useState(0)
 
   const hasSearchTerms = Boolean(location.trim() || name.trim())
   const canAddRoommate = Boolean(location.trim() && name.trim())
@@ -165,9 +167,40 @@ export default function HomePage() {
     return () => window.clearTimeout(timeoutId)
   }, [location, name])
 
+  useEffect(() => {
+    function updateContentOffset() {
+      if (!contentRef.current) return
+
+      const mobile = window.innerWidth <= 640
+      const navHeight = mobile ? 56 : 64
+      const minimumTopOffset = mobile ? 24 : 40
+      const upwardBias = mobile ? 20 : 56
+      const availableHeight = window.innerHeight - navHeight
+      const contentHeight = contentRef.current.offsetHeight
+      const centeredOffset = (availableHeight - contentHeight) / 2 - upwardBias
+
+      setContentTopOffset(Math.max(minimumTopOffset, Math.round(centeredOffset)))
+    }
+
+    updateContentOffset()
+
+    const observer = new ResizeObserver(() => updateContentOffset())
+
+    if (contentRef.current) {
+      observer.observe(contentRef.current)
+    }
+
+    window.addEventListener('resize', updateContentOffset)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', updateContentOffset)
+    }
+  }, [feedback, hasSearched, loading, error, roommates.length, location, name])
+
   return (
-    <div className="home-page">
-      <div className="home-content">
+    <div className="home-page" style={{ paddingTop: `${contentTopOffset}px` }}>
+      <div className="home-content" ref={contentRef}>
         <h1 className="home-title">Rate my Roommates</h1>
 
         {feedback ? (
@@ -185,6 +218,7 @@ export default function HomePage() {
           <SearchInput
             id="locationSearch"
             placeholder="Type your street address, city, state, or 5-digit ZIP code..."
+            ariaLabel="Search by location"
             value={location}
             onChange={setLocation}
           />
@@ -192,6 +226,7 @@ export default function HomePage() {
           <SearchInput
             id="nameSearch"
             placeholder="Search by name..."
+            ariaLabel="Search by name"
             value={name}
             onChange={setName}
           />

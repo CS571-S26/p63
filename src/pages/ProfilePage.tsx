@@ -5,6 +5,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { auth, db } from '../firebase'
 import UserPanelCard from '../components/UserPanelCard'
+import LocationInput from '../components/LocationInput'
 import './ProfilePage.css'
 
 export default function ProfilePage() {
@@ -142,10 +143,13 @@ export default function ProfilePage() {
               <Form.Control type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} />
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="profileLocation">
-              <Form.Label>Location</Form.Label>
-              <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="City, State" />
-            </Form.Group>
+            <LocationInput
+              id="profileLocation"
+              label="Location"
+              value={location}
+              onChange={setLocation}
+              placeholder="City, State"
+            />
 
             <Form.Group className="mb-0" controlId="profileBio">
               <Form.Label>Bio</Form.Label>

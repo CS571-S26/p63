@@ -1,14 +1,14 @@
 .home-page {
   min-height: calc(100vh - 64px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 1rem;
+  padding: 0 1rem 2rem;
+  transition: padding-top 220ms ease;
 }
 
 .home-content {
   width: min(760px, 100%);
-  transform: translateY(-12vh);
 }
 
 .home-title {
@@ -23,7 +23,7 @@
 
 .search-divider {
   text-align: center;
-  color: #6c757d;
+  color: #4b5563;
   margin-bottom: 1rem;
 }
 
@@ -54,7 +54,7 @@
 
 .search-add-hint {
   text-align: center;
-  color: #6b7280;
+  color: #4b5563;
 }
 
 .search-results {
@@ -99,9 +99,6 @@
 @media (max-width: 640px) {
   .home-page {
     min-height: calc(100vh - 56px);
-  }
-
-  .home-content {
-    transform: translateY(-8vh);
+    padding: 0 1rem 1.5rem;
   }
 }

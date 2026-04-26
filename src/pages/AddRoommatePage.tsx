@@ -3,6 +3,7 @@ import { Alert, Button, Form, Spinner } from 'react-bootstrap'
 import { collection, doc, getDoc, getDocs, limit, query, runTransaction, serverTimestamp, where, writeBatch } from 'firebase/firestore'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import RatingCategoryCard from '../components/RatingCategoryCard'
+import LocationInput from '../components/LocationInput'
 import UserPanelCard from '../components/UserPanelCard'
 import { auth, db } from '../firebase'
 import './AddRoommatePage.css'
@@ -288,16 +289,14 @@ export default function AddRoommatePage() {
               />
             </Form.Group>
 
-            <Form.Group controlId="roommateLocation">
-              <Form.Label>Where You Lived Together</Form.Label>
-              <Form.Control
-                type="text"
-                value={location}
-                onChange={(event) => setLocation(event.target.value)}
-                placeholder="City, State or address"
-                disabled={lockIdentity}
-              />
-            </Form.Group>
+            <LocationInput
+              id="roommateLocation"
+              label="Where You Lived Together"
+              value={location}
+              onChange={(val) => setLocation(val)}
+              placeholder="City, State or address"
+              disabled={lockIdentity}
+            />
           </div>
 
           <div className="rating-category-list">

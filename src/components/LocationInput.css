@@ -1,0 +1,63 @@
+.location-input-group {
+	position: relative;
+}
+
+.location-input-wrap {
+	position: relative;
+}
+
+/* Spinner inside the input */
+.location-input-spinner {
+	position: absolute;
+	right: 0.65rem;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 12px;
+	height: 12px;
+	border: 2px solid #d1d5db;
+	border-top-color: #6b7280;
+	border-radius: 50%;
+	animation: loc-spin 0.6s linear infinite;
+	pointer-events: none;
+}
+
+@keyframes loc-spin {
+	to { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Suggestions dropdown */
+.location-suggestions {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: calc(100% + 2px);
+	background: #fff;
+	border: 1px solid #d1d5db;
+	border-radius: 0.5rem;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+	z-index: 1200;
+	list-style: none;
+	margin: 0;
+	padding: 0.25rem 0;
+	max-height: 220px;
+	overflow-y: auto;
+}
+
+.location-suggestion-item {
+	display: block;
+	width: 100%;
+	padding: 0.5rem 0.85rem;
+	background: transparent;
+	border: none;
+	text-align: left;
+	font-size: 0.875rem;
+	color: #111827;
+	cursor: pointer;
+	line-height: 1.4;
+}
+
+.location-suggestion-item:hover,
+.location-suggestion-item:focus-visible {
+	background: #f3f4f6;
+	outline: none;
+}

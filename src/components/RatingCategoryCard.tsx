@@ -19,7 +19,7 @@ export default function RatingCategoryCard({
   return (
     <article className="rating-category-card">
       <div className="rating-category-header">
-        <h3 className="rating-category-title">{label}</h3>
+        <p className="rating-category-title">{label}</p>
         <span className="rating-category-value">{value.toFixed(1)}</span>
       </div>
 

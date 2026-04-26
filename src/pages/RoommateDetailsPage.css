@@ -66,7 +66,7 @@
 .roommate-overall-label {
   margin-top: 0.45rem;
   font-size: 1.05rem;
-  color: #6b7280;
+  color: #4b5563;
 }
 
 .roommate-rating-grid {
@@ -76,7 +76,7 @@
 }
 
 .roommate-no-ratings {
-  color: #6b7280;
+  color: #4b5563;
   align-self: center;
 }
 
