@@ -252,11 +252,15 @@ export default function HomePage() {
                 className="result-card result-card-button"
                 onClick={() => handleOpenDetails(roommate)}
               >
-                <h3>{roommate.name ?? 'Unnamed roommate'}</h3>
-                <p><strong>Location:</strong> {roommate.location ?? 'Not provided'}</p>
-                <p><strong>Rating:</strong> {typeof roommate.rating === 'number' ? roommate.rating.toFixed(1) : 'N/A'}</p>
-                <p><strong>Source:</strong> {roommate.source === 'user' ? 'User profile' : 'Roommate review'}</p>
-                {roommate.bio ? <p>{roommate.bio}</p> : null}
+                <div className="result-card-left">
+                  <h3>{roommate.name ?? 'Unnamed roommate'}</h3>
+                  <p className="result-location-text">
+                    {roommate.location ?? 'Location not provided'}
+                  </p>
+                </div>
+                <span className="result-rating-pill" aria-label={`Rating: ${typeof roommate.rating === 'number' ? roommate.rating.toFixed(1) : 'N/A'}`}>
+                  &#9733; {typeof roommate.rating === 'number' ? roommate.rating.toFixed(1) : 'N/A'}
+                </span>
               </button>
             ))}
           </div>
